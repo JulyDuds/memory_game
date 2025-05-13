@@ -318,10 +318,31 @@
   <audio id="sound-win" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
 
   <script>
- 
-    const emojiBase = ['💻','🖥️','👩‍💻','⌨️','🖱️','📱','📊','📈','📉','🚀','🔐','🛠️','💾','📡','🔨','🧮','🔌','📂','📁','🌐'];
+    // Substitua o array emojiBase por classes do Font Awesome
+    const iconBase = [
+        'fa-code',          // Ícone de código
+        'fa-laptop-code',   // Laptop com código
+        'fa-terminal',      // Terminal
+        'fa-keyboard',      // Teclado
+        'fa-microchip',     // Microchip
+        'fa-server',        // Servidor
+        'fa-database',      // Banco de dados
+        'fa-bug',           // Bug (debug)
+        'fa-code-branch',   // Branch (Git)
+        'fa-rocket',        // Foguete
+        'fa-lock',          // Cadeado (segurança)
+        'fa-tools',         // Ferramentas
+        'fa-save',          // Disquete (salvar)
+        'fa-wifi',          // Wi-Fi
+        'fa-hammer',        // Martelo
+        'fa-calculator',    // Calculadora
+        'fa-plug',          // Plugue
+        'fa-folder',        // Pasta
+        'fa-file-code',    // Arquivo de código
+        'fa-globe'          // Globo (internet)
+    ];
     
-    let emojis = [];
+    let icons = [];
     let cards = [];
     let firstCard = null;
     let secondCard = null;
@@ -373,8 +394,8 @@
 
     function createBoard() {
       let numPairs = maxPairsPerLevel[Math.min(level - 1, maxPairsPerLevel.length - 1)];
-      emojis = emojiBase.slice(0, numPairs);
-      cards = [...emojis, ...emojis];
+      icons = iconBase.slice(0, numPairs);
+      cards = [...icons, ...icons];
       shuffle(cards);
       board.innerHTML = "";
       matchedPairs = 0;
@@ -389,16 +410,22 @@
       status.className = "status-info";
       status.textContent = `Nível ${level}: Encontre todos os ${numPairs} pares!`;
 
-      // Sempre 4 colunas, número de linhas varia conforme o nível
       const rows = Math.ceil(cards.length / 4);
       board.style.gridTemplateRows = `repeat(${rows}, 70px)`;
 
-      cards.forEach((symbol, index) => {
+      cards.forEach((iconClass, index) => {
         const card = document.createElement("div");
         card.classList.add("card");
-        card.dataset.symbol = symbol;
+        card.dataset.symbol = iconClass;
         card.dataset.index = index;
         card.addEventListener("click", flipCard);
+        
+        // Adiciona o elemento <i> para o ícone (inicialmente vazio)
+        const iconElement = document.createElement("i");
+        iconElement.className = `fas ${iconClass}`;
+        iconElement.style.display = 'none'; // Inicialmente escondido
+        card.appendChild(iconElement);
+        
         board.appendChild(card);
       });
     }
@@ -407,7 +434,9 @@
       if (lockBoard || this.classList.contains("flipped") || this.classList.contains("matched")) return;
       
       this.classList.add("flipped");
-      this.textContent = this.dataset.symbol;
+      // Mostra o ícone
+      const icon = this.querySelector('i');
+      icon.style.display = 'inline-block';
       
       if (!firstCard) {
         firstCard = this;
@@ -429,7 +458,7 @@
         secondCard.classList.add("pulse");
         resetCards();
         
-        if (matchedPairs === emojis.length) {
+        if (matchedPairs === icons.length) {
           clearInterval(timerInterval);
           const timeTaken = Math.floor((new Date().getTime() - startTime) / 1000);
           wins++;
@@ -450,8 +479,9 @@
         setTimeout(() => {
           firstCard.classList.remove("flipped");
           secondCard.classList.remove("flipped");
-          firstCard.textContent = "";
-          secondCard.textContent = "";
+          // Esconde os ícones novamente
+          firstCard.querySelector('i').style.display = 'none';
+          secondCard.querySelector('i').style.display = 'none';
           resetCards();
         }, 800);
       }
