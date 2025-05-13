@@ -109,7 +109,7 @@
     let startTime;
     let timerInterval;
     let level = 1;
-    const maxPairsPerLevel = [4, 6, 8, 10, 12]; // aumenta com o nível
+    const maxPairsPerLevel = [4, 6, 8, 10, 12, 14, 16]; // aumenta com o nível
     const board = document.getElementById("game-board");
     const status = document.getElementById("status");
     const timerSpan = document.getElementById("timer");
@@ -182,6 +182,12 @@
           status.textContent = `🎉 Nível ${level} vencido em ${timeTaken} segundos!`;
           soundWin.play();
           updateRanking(level, timeTaken);
+    
+          if (level >= maxPairsPerLevel.length) {
+    status.textContent += " 🏁 Parabéns! Completaste todos os níveis!";
+    return;// encerra o jogo no nível max
+  }
+          
           level++;
           setTimeout(() => {
             createBoard();
