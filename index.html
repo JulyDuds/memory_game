@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Jogo da Memória - Níveis</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f4f8;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    #controls {
+      margin: 10px 0;
+    }
+
+    #game-board {
+      display: grid;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .card {
+      width: 80px;
+      height: 80px;
+      background-color: #2196f3;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .flipped {
+      background-color: #fff;
+      color: #333;
+      cursor: default;
+    }
+
+    #status {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    #rankings {
+      margin-top: 30px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin: 4px 0;
+    }
+
+    button {
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 5px;
+      border: none;
+      background: #4caf50;
+      color: white;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Jogo da Memória</h1>
+  <div id="controls">
+    <span id="level">Nível: 1</span> |
+    ⏱️ <span id="timer">0s</span>
+    <br>
+    <button onclick="restartGame()">🔁 Reiniciar</button>
+  </div>
+
+  <div id="game-board"></div>
+  <div id="status"></div>
+
+  <div id="rankings">
+    <h2>🏆 Melhores Tempos</h2>
+    <ul id="ranking-list"></ul>
+  </div>
+
+  <audio id="sound-correct" src="data:audio/mp3;base64,//uQxAA..." preload="auto"></audio>
+  <audio id="sound-wrong" src="data:audio/mp3;base64,//uQxAA..." preload="auto"></audio>
+  <audio id="sound-win" src="data:audio/mp3;base64,//uQxAA..." preload="auto"></audio>
+
+  <script>
+    const emojiBase = ['🐶','🐱','🐭','🐹','🦊','🐻','🐼','🐸','🐵','🐙','🦄','🐯','🐷','🐰','🐔','🐳'];
+    let emojis = [];
+    let cards = [];
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let matchedPairs = 0;
+    let startTime;
+    let timerInterval;
+    let level = 1;
+    const maxPairsPerLevel = [4, 6, 8, 10, 12]; // aumenta com o nível
+    const board = document.getElementById("game-board");
+    const status = document.getElementById("status");
+    const timerSpan = document.getElementById("timer");
+    const levelSpan = document.getElementById("level");
+    const rankingList = document.getElementById("ranking-list");
+
+    const soundCorrect = document.getElementById("sound-correct");
+    const soundWrong = document.getElementById("sound-wrong");
+    const soundWin = document.getElementById("sound-win");
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function createBoard() {
+      let numPairs = maxPairsPerLevel[Math.min(level - 1, maxPairsPerLevel.length - 1)];
+      emojis = emojiBase.slice(0, numPairs);
+      cards = [...emojis, ...emojis];
+      shuffle(cards);
+      board.innerHTML = "";
+      matchedPairs = 0;
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+      startTime = new Date().getTime();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+      timerSpan.textContent = "0s";
+      levelSpan.textContent = `Nível: ${level}`;
+
+      const gridSize = Math.ceil(Math.sqrt(cards.length));
+      board.style.gridTemplateColumns = `repeat(${gridSize}, 80px)`;
+
+      cards.forEach((symbol, index) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.symbol = symbol;
+        card.dataset.index = index;
+        card.textContent = "";
+        card.addEventListener("click", flipCard);
+        board.appendChild(card);
+      });
+    }
+
+    function flipCard() {
+      if (lockBoard || this.classList.contains("flipped")) return;
+      this.classList.add("flipped");
+      this.textContent = this.dataset.symbol;
+
+      if (!firstCard) {
+        firstCard = this;
+      } else {
+        secondCard = this;
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      lockBoard = true;
+      if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+        matchedPairs++;
+        soundCorrect.play();
+        resetCards();
+        if (matchedPairs === emojis.length) {
+          clearInterval(timerInterval);
+          const timeTaken = Math.floor((new Date().getTime() - startTime) / 1000);
+          status.textContent = `🎉 Nível ${level} vencido em ${timeTaken} segundos!`;
+          soundWin.play();
+          updateRanking(level, timeTaken);
+          level++;
+          setTimeout(() => {
+            createBoard();
+            displayRanking();
+            status.textContent = "";
+          }, 1500);
+        }
+      } else {
+        soundWrong.play();
+        setTimeout(() => {
+          firstCard.classList.remove("flipped");
+          secondCard.classList.remove("flipped");
+          firstCard.textContent = "";
+          secondCard.textContent = "";
+          resetCards();
+        }, 800);
+      }
+    }
+
+    function resetCards() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+    }
+
+    function updateTimer() {
+      const elapsed = Math.floor((new Date().getTime() - startTime) / 1000);
+      timerSpan.textContent = `${elapsed}s`;
+    }
+
+    function updateRanking(lvl, newTime) {
+      let rankings = JSON.parse(localStorage.getItem("memoryRankings")) || {};
+      if (!rankings[lvl]) rankings[lvl] = [];
+      rankings[lvl].push(newTime);
+      rankings[lvl].sort((a, b) => a - b);
+      rankings[lvl] = rankings[lvl].slice(0, 5);
+      localStorage.setItem("memoryRankings", JSON.stringify(rankings));
+    }
+
+    function displayRanking() {
+      let rankings = JSON.parse(localStorage.getItem("memoryRankings")) || {};
+      const list = rankings[level] || [];
+      rankingList.innerHTML = "";
+      list.forEach((time, index) => {
+        const li = document.createElement("li");
+        li.textContent = `Nível ${level} - #${index + 1}: ${time}s`;
+        rankingList.appendChild(li);
+      });
+    }
+
+    function restartGame() {
+      level = 1;
+      createBoard();
+      displayRanking();
+      status.textContent = "";
+    }
+
+    // Sons base64 simplificados por limitação de espaço
+    soundCorrect.src = "data:audio/mp3;base64,//uQxAAAAAAAAAAAAA...";
+    soundWrong.src   = "data:audio/mp3;base64,//uQxAAAAAAAAAAAAA...";
+    soundWin.src     = "data:audio/mp3;base64,//uQxAAAAAAAAAAAAA...";
+
+    // Inicializa o jogo
+    createBoard();
+    displayRanking();
+  </script>
+</body>
+</html>
