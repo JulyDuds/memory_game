@@ -21,7 +21,7 @@ Este ficheiro contém:
 - O **layout completo** do jogo com HTML semântico
 - Estilos CSS **in-line** para personalizar o aspeto visual
 - Um script JavaScript que:
-  - Cria e embaralha os pares de cartas com emojis 🐶🐱🐭
+  - Cria e embaralha os pares de cartas com ícones
   - Controla a lógica dos cliques e acertos
   - Gere os **níveis de dificuldade**
   - Calcula o **tempo de conclusão**
@@ -32,7 +32,6 @@ Este ficheiro contém:
 
 - ✅ Níveis progressivos com número crescente de pares
 - ⏱️ Temporizador em tempo real
-- 🔁 Botão de reinício
 - 🏆 Rankings locais por nível (Top 5)
 - 📈 Dificuldade crescente a cada fase concluída
 - 🔊 Feedback sonoro para cada ação
