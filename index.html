@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emoji Encryption | Jogo para Programadores</title>
+  <title>Emoji Encryption </title>
   <link rel="icon" type="image/x-icon" href="favicon.svg">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -312,7 +312,17 @@
       <ul id="ranking-list"></ul>
     </div>
   </div>
-
+   <footer class="footer">
+              <p>&copy; <span id="current-year"></span> Game Lab. Todos os direitos reservados.</p>
+  
+              
+          </footer>
+      </div>
+  
+      <script>
+          document.getElementById('current-year').textContent = new Date().getFullYear();
+      </script>
+    <script src="script.js"></script>
   <audio id="sound-correct" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
   <audio id="sound-wrong" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" preload="auto"></audio>
   <audio id="sound-win" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
@@ -420,10 +430,10 @@
         card.dataset.index = index;
         card.addEventListener("click", flipCard);
         
-        // Adiciona o elemento <i> para o ícone (inicialmente vazio)
+       
         const iconElement = document.createElement("i");
         iconElement.className = `fas ${iconClass}`;
-        iconElement.style.display = 'none'; // Inicialmente escondido
+        iconElement.style.display = 'none'; 
         card.appendChild(iconElement);
         
         board.appendChild(card);
